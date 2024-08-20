@@ -1,0 +1,176 @@
+use proc_macro::TokenStream;
+use proc_macro2::Span;
+use proc_macro_crate::{crate_name, FoundCrate};
+use quote::{format_ident, quote};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, GenericParam, Lifetime, LifetimeParam};
+
+#[proc_macro_derive(ReverseDeserialize)]
+pub fn reverse_deserialize_derive(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = &input.ident;
+
+    let has_generics = !input.generics.params.is_empty();
+
+    let mut generics = input.generics.clone();
+    let lt = Lifetime::new("'de", Span::call_site());
+    generics
+        .params
+        .push(GenericParam::Lifetime(LifetimeParam::new(lt.clone())));
+
+    let (impl_generics, _, _) = generics.split_for_impl();
+
+    let (_, ty_generics_2, where_clause_2) = input.generics.split_for_impl();
+    let where_clause_2 = if where_clause_2.is_some() {
+        quote! {
+            #where_clause_2 + ::serde::Deserialize<'de>
+        }
+    } else {
+        quote! {}
+    };
+
+    let (field_idents, field_types): (Vec<_>, Vec<_>) = if let Data::Struct(data) = &input.data {
+        if let Fields::Named(fields) = &data.fields {
+            fields
+                .named
+                .iter()
+                .map(|f| (f.ident.as_ref().unwrap(), &f.ty))
+                .rev()
+                .unzip()
+        } else {
+            panic!("ReverseDeserialize can only be derived for structs with named fields");
+        }
+    } else {
+        panic!("ReverseDeserialize can only be derived for structs");
+    };
+
+    let field_names_string = field_idents
+        .iter()
+        .map(|ident| ident.to_string())
+        .collect::<Vec<_>>();
+    let field_enum = field_idents
+        .iter()
+        .enumerate()
+        .map(|(i, _)| format_ident!("Field{}", i))
+        .collect::<Vec<_>>();
+
+    let (main_visitor, init_visitor) = if has_generics {
+        (
+            quote! {
+                struct MainVisitor #ty_generics_2(::core::marker::PhantomData #ty_generics_2);
+            },
+            quote! {
+                MainVisitor(::core::marker::PhantomData)
+            },
+        )
+    } else {
+        (
+            quote! {
+                struct MainVisitor;
+            },
+            quote! {
+                MainVisitor
+            },
+        )
+    };
+
+    let expanded = quote! {
+        impl #impl_generics ::serde::Deserialize<'de> for #name #ty_generics_2 #where_clause_2 {
+            fn deserialize<D>(deserializer: D) -> ::core::result::Result<Self, D::Error>
+            where
+                D: ::serde::Deserializer<'de>,
+            {
+                #[derive(Deserialize)]
+                #[serde(field_identifier, rename_all = "lowercase")]
+                enum Field {
+                    #(#field_enum),*
+                }
+
+                #main_visitor
+                impl #impl_generics ::serde::de::Visitor<'de> for MainVisitor #ty_generics_2 #where_clause_2 {
+                    type Value = #name #ty_generics_2;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str(stringify!("struct {}", #name))
+                    }
+
+                    fn visit_seq<A>(self, mut seq: A) -> std::result::Result<Self::Value, A::Error>
+                    where
+                        A: ::serde::de::SeqAccess<'de>,
+                    {
+                        #(
+                            let #field_idents = seq.next_element::<#field_types>()?.ok_or_else(|| ::serde::de::Error::invalid_length(0, &self))?;
+                        )*
+
+                        Ok(Self::Value {
+                            #(#field_idents),*
+                        })
+                    }
+                }
+
+                const FIELDS: &[&str] = &[#(#field_names_string),*];
+                deserializer.deserialize_struct(stringify!(#name), FIELDS, #init_visitor)
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+#[proc_macro_derive(SquashObject)]
+pub fn derive_squash_object(input: TokenStream) -> TokenStream {
+    let found_crate = crate_name("squash").expect("squash is present in `Cargo.toml`");
+
+    let (squash_object, squash_cursor, result) = match found_crate {
+        FoundCrate::Itself => (quote!(SquashObject), quote!(SquashCursor), quote!(Result)),
+        FoundCrate::Name(_) => (
+            quote!(::squash::SquashObject),
+            quote!(::squash::SquashCursor),
+            quote!(::squash::Result),
+        ),
+    };
+
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = &input.ident;
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
+    let fields = if let Data::Struct(data) = &input.data {
+        if let Fields::Named(fields) = &data.fields {
+            fields.named.iter().collect::<Vec<_>>()
+        } else {
+            panic!("SquashObject can only be derived for structs with named fields");
+        }
+    } else {
+        panic!("SquashObject can only be derived for structs");
+    };
+
+    let field_names: Vec<_> = fields.iter().map(|f| &f.ident).collect();
+    let field_pushes: Vec<_> = field_names
+        .iter()
+        .map(|name| quote! { count += cursor.push(self.#name.clone())?; })
+        .collect();
+    let field_pops: Vec<_> = field_names
+        .iter()
+        .map(|name| quote! { #name: cursor.pop()?, })
+        .collect();
+
+    let expanded = quote! {
+        impl #impl_generics #squash_object for #name #ty_generics #where_clause {
+            fn pop_obj<Obj>(cursor: &mut Obj) -> #result<Self>
+            where
+                Obj: #squash_cursor,
+                Self: Sized {
+                Ok(#name {
+                    #(#field_pops)*
+                })
+            }
+
+            fn push_obj<Obj: #squash_cursor>(self, cursor: &mut Obj) -> #result<usize> {
+                let mut count = 0;
+                #(#field_pushes)*
+                Ok(count)
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}

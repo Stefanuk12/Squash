@@ -1,5 +1,4 @@
-node_modules
-build
-
-selene.toml
-sourcemap.json
+target
+Cargo.lock
+init.luau
+squash/src/main.rs

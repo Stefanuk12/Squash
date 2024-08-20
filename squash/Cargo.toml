@@ -1,0 +1,16 @@
+[package]
+name = "squash"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+squash-derive = { path = "../squash-derive" }
+
+thiserror = "1.0"
+serde = { version = "1.0" , features = ["derive"] }
+derive_more = { version = "1.0", features = ["full"] }
+ux = "0.1"
+
+[features]
+default = ["roblox"]
+roblox = []

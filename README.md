@@ -5,23 +5,3 @@ A simple but comprehensive SerDes (Serialization-Deserialization) library for Ro
 # Documentation
 
 https://data-oriented-house.github.io/Squash/
-
-# Installation
-
-- Copy / Paste
-	- Copy the contents of `src/init.lua` into a ModuleScript
-
-- Wally Package Manager
-	- Locate your `wally.toml` file
-	- Copy the `Install` contents from [wally.run](https://wally.run/package/data-oriented-house/squash) into your `wally.toml` file under the `[dependencies]` section.
-	- Run `wally install` in your terminal
-	- ???
-	- Profit
-
-# How Do I Contribute?
-
-- Fork the repository
-- Make your changes
-- Submit a pull request
-- ¿¿¿
-- Profit
