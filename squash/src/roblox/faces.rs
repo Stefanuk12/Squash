@@ -1,5 +1,6 @@
 use super::prelude::*;
 
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Faces {
     pub back: bool,
     pub bottom: bool,
@@ -8,18 +9,44 @@ pub struct Faces {
     pub right: bool,
     pub top: bool,
 }
+impl From<u8> for Faces {
+    fn from(x: u8) -> Self {
+        Faces {
+            back: (x & 1) != 0,
+            bottom: (x & 2) != 0,
+            front: (x & 4) != 0,
+            left: (x & 8) != 0,
+            right: (x & 16) != 0,
+            top: (x & 32) != 0,
+        }
+    }
+}
+impl From<Faces> for u8 {
+    fn from(x: Faces) -> Self {
+        (x.back as u8) |
+        (x.bottom as u8) << 1 |
+        (x.front as u8) << 2 |
+        (x.left as u8) << 3 |
+        (x.right as u8) << 4 |
+        (x.top as u8) << 5
+    }
+}
+impl SquashObject for Faces {
+    fn pop_obj<T>(cursor: &mut T) -> crate::Result<Self>
+            where
+                T: SquashCursor,
+                Self: Sized {
+        u8::pop_obj(cursor).map(Self::from)
+    }
+    fn push_obj<T: SquashCursor>(self, cursor: &mut T) -> crate::Result<usize> {
+        cursor.push(u8::from(self))
+    }
+}
 impl Serialize for Faces {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
             S: serde::Serializer {
-        serializer.serialize_u8(
-            (self.back as u8) |
-            (self.bottom as u8) << 1 |
-            (self.front as u8) << 2 |
-            (self.left as u8) << 3 |
-            (self.right as u8) << 4 |
-            (self.top as u8) << 5
-        )
+        serializer.serialize_u8(u8::from(*self))
     }
 }
 impl<'de> Deserialize<'de> for Faces {
@@ -27,13 +54,6 @@ impl<'de> Deserialize<'de> for Faces {
         where
             D: serde::Deserializer<'de> {
         let x = u8::deserialize(deserializer)?;
-        Ok(Faces {
-            back: (x & 1) != 0,
-            bottom: (x & 2) != 0,
-            front: (x & 4) != 0,
-            left: (x & 8) != 0,
-            right: (x & 16) != 0,
-            top: (x & 32) != 0,
-        })
+        Ok(Self::from(x))
     }
 }

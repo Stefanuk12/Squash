@@ -12,21 +12,50 @@ pub struct Axes {
     pub back: bool,
     pub front: bool,
 }
+impl From<u16> for Axes {
+    fn from(value: u16) -> Self {
+        Axes {
+            x: (value & 256) != 0,
+            y: (value & 512) != 0,
+            z: (value & 1024) != 0,
+            top: (value & 32) != 0,
+            bottom: (value & 4) != 0,
+            left: (value & 8) != 0,
+            right: (value & 16) != 0,
+            back: (value & 1) != 0,
+            front: (value & 2) != 0,
+        }
+    }
+}
+impl From<Axes> for u16 {
+    fn from(value: Axes) -> Self {
+        (value.back as u16) |
+        (value.bottom as u16) << 1 |
+        (value.front as u16) << 2 |
+        (value.left as u16) << 3 |
+        (value.right as u16) << 4 |
+        (value.top as u16) << 5 |
+        (value.x as u16) << 8 |
+        (value.y as u16) << 9 |
+        (value.z as u16) << 10
+    }
+}
+impl SquashObject for Axes {
+    fn pop_obj<T>(cursor: &mut T) -> crate::Result<Self>
+            where
+                T: SquashCursor,
+                Self: Sized {
+        u16::pop_obj(cursor).map(Self::from)
+    }
+    fn push_obj<T: SquashCursor>(self, cursor: &mut T) -> crate::Result<usize> {
+        cursor.push(u16::from(self))
+    }
+}
 impl Serialize for Axes {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
             S: serde::Serializer {
-        serializer.serialize_u16(
-            (self.back as u16) |
-            (self.bottom as u16) << 1 |
-            (self.front as u16) << 2 |
-            (self.left as u16) << 3 |
-            (self.right as u16) << 4 |
-            (self.top as u16) << 5 |
-            (self.x as u16) << 8 |
-            (self.y as u16) << 9 |
-            (self.z as u16) << 10
-        )
+        serializer.serialize_u16(u16::from(*self))
     }
 }
 impl<'de> Deserialize<'de> for Axes {
@@ -34,16 +63,6 @@ impl<'de> Deserialize<'de> for Axes {
         where
             D: serde::Deserializer<'de> {
         let x = u16::deserialize(deserializer)?;
-        Ok(Axes {
-            back: (x & 1) != 0,
-            front: (x & 2) != 0,
-            bottom: (x & 4) != 0,
-            left: (x & 8) != 0,
-            right: (x & 16) != 0,
-            top: (x & 32) != 0,
-            x: (x & 256) != 0,
-            y: (x & 512) != 0,
-            z: (x & 1024) != 0,
-        })
+        Ok(Self::from(x))
     }
 }

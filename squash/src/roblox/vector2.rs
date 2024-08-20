@@ -11,7 +11,6 @@ impl<T: SquashNumber> Vector2<T> {
     }
 }
 
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Serialize, ReverseDeserialize, SquashObject)]
 pub struct Vector2int16 {
     pub y: i16,

@@ -86,7 +86,7 @@ impl<T: SquashNumber> Cframe<T> {
         })
     }
 }
-
+impl_squash_object_a!(Cframe<T: SquashNumber>, rotation, position;position, rotation);
 impl<T> Serialize for Cframe<T>
 where
     T: SquashNumber,

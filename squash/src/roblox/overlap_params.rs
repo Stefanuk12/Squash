@@ -41,10 +41,11 @@ impl SquashObject for OverlapParamsBool {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Serialize, ReverseDeserialize, SquashObject)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Serialize)]
 pub struct OverlapParams {
     pub bool_data: OverlapParamsBool,
     pub max_parts: u16,
     pub raycast_filter_type: EnumItem,
     pub collision_group: String
 }
+impl_squash!(OverlapParams, bool_data, max_parts, raycast_filter_type, collision_group;collision_group, raycast_filter_type, max_parts, bool_data);
