@@ -281,88 +281,6 @@ macro_rules! impl_reverse_deserialize {
         }
     };
 }
-// #[doc(hidden)]
-// #[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
-// const _: () = {
-//     #[allow(unused_extern_crates, clippy::useless_attribute)]
-//     extern crate serde as _serde;
-//     #[automatically_derived]
-//     impl<'de, T: SquashNumber> _serde::Deserialize<'de> for NumberSequence<T>
-//     where
-//         T: SquashNumber,
-//     {
-//         fn deserialize<__D>(__deserializer: __D) -> _serde::__private::Result<Self, __D::Error>
-//         where
-//             __D: _serde::Deserializer<'de>,
-//         {
-//             #[doc(hidden)]
-//             struct __Visitor<'de, T: SquashNumber>
-//             where
-//                 T: SquashNumber,
-//             {
-//                 marker: _serde::__private::PhantomData<NumberSequence<T>>,
-//                 lifetime: _serde::__private::PhantomData<&'de ()>,
-//             }
-//             impl<'de, T: SquashNumber> _serde::de::Visitor<'de> for __Visitor<'de, T>
-//             where
-//                 T: SquashNumber,
-//             {
-//                 type Value = NumberSequence<T>;
-//                 fn expecting(
-//                     &self,
-//                     __formatter: &mut _serde::__private::Formatter,
-//                 ) -> _serde::__private::fmt::Result {
-//                     _serde::__private::Formatter::write_str(
-//                         __formatter,
-//                         "tuple struct NumberSequence",
-//                     )
-//                 }
-//                 #[inline]
-//                 fn visit_newtype_struct<__E>(
-//                     self,
-//                     __e: __E,
-//                 ) -> _serde::__private::Result<Self::Value, __E::Error>
-//                 where
-//                     __E: _serde::Deserializer<'de>,
-//                 {
-//                     let __field0: Vec<NumberSequenceKeypoint<T>> =
-//                         <Vec<NumberSequenceKeypoint<T>> as _serde::Deserialize>::deserialize(__e)?;
-//                     _serde::__private::Ok(NumberSequence(__field0))
-//                 }
-//                 #[inline]
-//                 fn visit_seq<__A>(
-//                     self,
-//                     mut __seq: __A,
-//                 ) -> _serde::__private::Result<Self::Value, __A::Error>
-//                 where
-//                     __A: _serde::de::SeqAccess<'de>,
-//                 {
-//                     let __field0 = match _serde::de::SeqAccess::next_element::<
-//                         Vec<NumberSequenceKeypoint<T>>,
-//                     >(&mut __seq)?
-//                     {
-//                         _serde::__private::Some(__value) => __value,
-//                         _serde::__private::None => {
-//                             return _serde::__private::Err(_serde::de::Error::invalid_length(
-//                                 0usize,
-//                                 &"tuple struct NumberSequence with 1 element",
-//                             ))
-//                         }
-//                     };
-//                     _serde::__private::Ok(NumberSequence(__field0))
-//                 }
-//             }
-//             _serde::Deserializer::deserialize_newtype_struct(
-//                 __deserializer,
-//                 "NumberSequence",
-//                 __Visitor {
-//                     marker: _serde::__private::PhantomData::<NumberSequence<T>>,
-//                     lifetime: _serde::__private::PhantomData,
-//                 },
-//             )
-//         }
-//     }
-// };
 
 #[macro_export]
 macro_rules! impl_squash_object_a {
@@ -455,5 +373,72 @@ macro_rules! impl_squash {
     };
     ($ident:ident) => {
         $crate::impl_squash_object_a!($ident);
+    };
+}
+
+#[macro_export]
+macro_rules! impl_serde_for_enum {
+    ($enum_name:ident, $($variant:ident = $index:literal),*) => {
+        impl ::serde::Serialize for $enum_name {
+            fn serialize<S>(&self, serializer: S) -> ::core::result::Result<S::Ok, S::Error>
+            where
+                S: ::serde::Serializer,
+            {
+                match self {
+                    $(
+                        $enum_name::$variant(v) => {
+                            let mut seq = serializer.serialize_struct(stringify!($enum_name), 2)?;
+                            seq.serialize_field("0", v)?;
+                            seq.serialize_field("1", &$index)?;
+                            seq.end()
+                        }
+                    )*
+                }
+            }
+        }
+
+        impl<'de> ::serde::Deserialize<'de> for $enum_name {
+            fn deserialize<D>(deserializer: D) -> ::core::result::Result<Self, D::Error>
+            where
+                D: ::serde::Deserializer<'de>,
+            {
+                #[derive(Deserialize)]
+                #[serde(field_identifier, rename_all = "lowercase")]
+                enum Field {
+                    C,
+                    T,
+                }
+
+                struct MainVisitor;
+                impl<'de> Visitor<'de> for MainVisitor {
+                    type Value = $enum_name;
+
+                    fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+                        formatter.write_str(stringify!("enum ", $enum_name))
+                    }
+
+                    fn visit_seq<A>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error>
+                    where
+                        A: serde::de::SeqAccess<'de>,
+                    {
+                        let tag = seq
+                            .next_element::<u8>()?
+                            .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?;
+                        match tag {
+                            $(
+                                $index => Ok($enum_name::$variant(
+                                    seq.next_element()?
+                                        .ok_or_else(|| serde::de::Error::invalid_length(0, &self))?,
+                                )),
+                            )*
+                            _ => Err(serde::de::Error::invalid_length(0, &self)),
+                        }
+                    }
+                }
+
+                const FIELDS: &[&str] = &["t", "c"];
+                ::serde::Deserializer::deserialize_struct(deserializer, stringify!($enum_name), FIELDS, MainVisitor)
+            }
+        }
     };
 }
