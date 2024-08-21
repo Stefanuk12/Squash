@@ -1,6 +1,7 @@
 use super::prelude::*;
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct Vector3<T: SquashFloat> {
     pub z: T,
     pub y: T,
@@ -21,7 +22,8 @@ impl<T: SquashFloat> Default for Vector3<T> {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct Vector3int16 {
     pub z: i16, 
     pub y: i16,

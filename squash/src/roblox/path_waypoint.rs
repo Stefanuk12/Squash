@@ -1,6 +1,7 @@
 use super::prelude::*;
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct PathWaypoint<T: SquashFloat> {
     pub label: String,
     pub action: EnumItem,

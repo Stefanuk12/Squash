@@ -1,1 +1,3 @@
-import!(ser, des, cursor);
+#[cfg(feature = "serde")]
+import!(ser, des);
+import!(cursor);

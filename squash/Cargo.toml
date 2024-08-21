@@ -22,11 +22,15 @@ keywords = [
 squash-derive = { path = "../squash-derive" }
 
 thiserror.workspace = true
-serde.workspace = true
-binrw.workspace = true
+serde = { workspace = true, optional = true }
 derive_more.workspace = true
 ux.workspace = true
 
 [features]
 default = ["roblox"]
 roblox = []
+serde = ["dep:serde"]
+
+[[example]]
+name = "enum_serde"
+required-features = ["serde"]

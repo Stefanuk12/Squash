@@ -1,6 +1,7 @@
 use super::prelude::*;
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct TweenInfo {
     pub delay_time: f32,
     pub reverses: bool,

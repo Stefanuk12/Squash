@@ -42,6 +42,8 @@ impl SquashObject for Faces {
         cursor.push(u8::from(self))
     }
 }
+
+#[cfg(feature = "serde")]
 impl Serialize for Faces {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
@@ -49,6 +51,7 @@ impl Serialize for Faces {
         serializer.serialize_u8(u8::from(*self))
     }
 }
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Faces {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where

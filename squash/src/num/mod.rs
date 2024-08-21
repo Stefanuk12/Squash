@@ -1,5 +1,3 @@
-use serde::de::DeserializeOwned;
-
 use crate::SquashObject;
 
 import!(int, float, uint, ux, vlq);
@@ -20,7 +18,10 @@ macro_rules! impl_zero {
 
 impl_zero!(u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize);
 
-pub trait SquashNumber: DeserializeOwned + SquashObject + Clone + Zero {}
+#[cfg(feature = "serde")]
+pub trait SquashNumber: serde::de::DeserializeOwned + SquashObject + Clone + Zero {}
+#[cfg(not(feature = "serde"))]
+pub trait SquashNumber: SquashObject + Clone + Zero {}
 
 macro_rules! impl_squash_number {
     ($($t:ty),*) => {

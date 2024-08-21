@@ -1,13 +1,15 @@
 use super::prelude::*;
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct Udim<T: SquashFloat> {
     pub offset: T,
     pub scale: T,
 }
 impl_squash!(Udim<T: SquashFloat>, offset, scale;scale, offset);
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct Udim2<T: SquashFloat> {
     pub y: Udim<T>,
     pub x: Udim<T>,

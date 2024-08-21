@@ -1,5 +1,3 @@
-use std::io::Cursor;
-
 use ux::*;
 
 use crate::prelude::*;
@@ -68,21 +66,23 @@ impl SquashObject for Vlq {
     }
 }
 
+#[cfg(feature = "serde")]
 impl Serialize for Vlq {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
             S: Serializer {
-        let mut cursor = Cursor::new(Vec::new());
+        let mut cursor = std::io::Cursor::new(Vec::new());
         cursor.push(*self).map_err(|e| serde::ser::Error::custom(e))?;
         serializer.serialize_bytes(cursor.into_inner().as_slice())
     }
 }
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Vlq {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
             D: Deserializer<'de> {
         let bytes = Vec::<u8>::deserialize(deserializer)?;
-        let mut cursor = Cursor::new(bytes);
+        let mut cursor = std::io::Cursor::new(bytes);
         cursor.pop::<Vlq>().map_err(|e| serde::de::Error::custom(e))
     }
 }

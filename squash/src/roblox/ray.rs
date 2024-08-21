@@ -1,6 +1,7 @@
 use super::prelude::*;
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct Ray<T: SquashFloat> {
     pub direction: Vector3<T>,
     pub origin: Vector3<T>,

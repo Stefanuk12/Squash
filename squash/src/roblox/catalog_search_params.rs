@@ -1,6 +1,7 @@
 use super::prelude::*;
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct CatalogSearchParams {
     pub include_off_sale: bool,
     pub limit: u8,

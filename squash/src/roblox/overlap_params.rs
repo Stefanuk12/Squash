@@ -7,6 +7,8 @@ pub struct OverlapParamsBool {
     pub brute_force_all_slow: bool,
     pub respect_can_collide: bool
 }
+
+#[cfg(feature = "serde")]
 impl Serialize for OverlapParamsBool {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
@@ -17,6 +19,7 @@ impl Serialize for OverlapParamsBool {
         state.end()
     }
 }
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for OverlapParamsBool {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
@@ -28,6 +31,7 @@ impl<'de> Deserialize<'de> for OverlapParamsBool {
         })
     }
 }
+
 impl SquashObject for OverlapParamsBool {
     fn pop_obj<T>(cursor: &mut T) -> crate::Result<Self>
             where
@@ -41,7 +45,8 @@ impl SquashObject for OverlapParamsBool {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct OverlapParams {
     pub bool_data: OverlapParamsBool,
     pub max_parts: u16,

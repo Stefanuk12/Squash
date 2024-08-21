@@ -1,7 +1,3 @@
-use core::fmt::Display;
-
-use serde::{de, ser};
-
 pub type Result<T> = core::result::Result<T, Error>;
 pub type CoreResult<T, E> = core::result::Result<T, E>;
 
@@ -24,13 +20,16 @@ pub enum Error {
     #[error("{0}")]
     Custom(String),
 }
-impl ser::Error for Error {
-    fn custom<T: Display>(msg: T) -> Self {
+
+#[cfg(feature = "serde")]
+impl serde::ser::Error for Error {
+    fn custom<T: core::fmt::Display>(msg: T) -> Self {
         Error::Custom(msg.to_string())
     }
 }
-impl de::Error for Error {
-    fn custom<T: Display>(msg: T) -> Self {
+#[cfg(feature = "serde")]
+impl serde::de::Error for Error {
+    fn custom<T: core::fmt::Display>(msg: T) -> Self {
         Error::Custom(msg.to_string())
     }
 }

@@ -1,7 +1,4 @@
-use core::fmt;
-use std::{marker::PhantomData, num::NonZeroU8};
-
-use serde::de::Visitor;
+use std::num::NonZeroU8;
 
 use super::prelude::*;
 
@@ -34,12 +31,14 @@ const CFRAME_ROTS: [CframeRotSegments; 25] = [
     CframeRotSegments::new(-1239, 1238, -1239),
 ];
 
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Serialize, ReverseDeserialize, SquashObject)]
+#[cfg_attr(feature = "serde", derive(Serialize, ReverseDeserialize))]
+#[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct CframeRotSegments {
     pub z: i16,
     pub y: i16,
     pub x: i16,
 }
+impl_squash_object_a!(CframeRotSegments, x, y, z;z, y, x);
 impl CframeRotSegments {
     pub const fn new(x: i16, y: i16, z: i16) -> Self {
         Self { x, y, z }
@@ -89,6 +88,7 @@ impl<T: SquashFloat> Cframe<T> {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<T> Serialize for Cframe<T>
 where
     T: SquashFloat,
@@ -109,16 +109,17 @@ where
         state.end()
     }
 }
+#[cfg(feature = "serde")]
 impl<'de, T: SquashFloat> Deserialize<'de> for Cframe<T> {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
             D: Deserializer<'de> {
-        struct CframeVisitor<T>(PhantomData<T>);
+        struct CframeVisitor<T>(core::marker::PhantomData<T>);
 
-        impl<'de, T: SquashFloat> Visitor<'de> for CframeVisitor<T> {
+        impl<'de, T: SquashFloat> serde::de::Visitor<'de> for CframeVisitor<T> {
             type Value = Cframe<T>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
                 formatter.write_str("a CFrame")
             }
 
@@ -137,6 +138,6 @@ impl<'de, T: SquashFloat> Deserialize<'de> for Cframe<T> {
             }
         }
 
-        deserializer.deserialize_struct("Cframe", &["rotation", "special_id", "position"], CframeVisitor(PhantomData))
+        deserializer.deserialize_struct("Cframe", &["rotation", "special_id", "position"], CframeVisitor(core::marker::PhantomData))
     }
 }

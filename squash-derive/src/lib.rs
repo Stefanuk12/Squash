@@ -1,6 +1,5 @@
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-use proc_macro_crate::{crate_name, FoundCrate};
 use quote::{format_ident, quote};
 use syn::{
     parse_macro_input, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericParam,
@@ -323,16 +322,11 @@ fn derive_squash_object_enum(
 
 #[proc_macro_derive(SquashObject)]
 pub fn derive_squash_object(input: TokenStream) -> TokenStream {
-    let found_crate = crate_name("squash").expect("squash is present in `Cargo.toml`");
-
-    let (squash_object, squash_cursor, result) = match found_crate {
-        FoundCrate::Itself => (quote!(SquashObject), quote!(SquashCursor), quote!(Result)),
-        FoundCrate::Name(_) => (
-            quote!(::squash::SquashObject),
-            quote!(::squash::SquashCursor),
-            quote!(::squash::Result),
-        ),
-    };
+    let (squash_object, squash_cursor, result) =(
+        quote!(::squash::SquashObject),
+        quote!(::squash::SquashCursor),
+        quote!(::squash::Result),
+    );
 
     let input = parse_macro_input!(input as DeriveInput);
 

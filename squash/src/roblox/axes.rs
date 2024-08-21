@@ -51,6 +51,7 @@ impl SquashObject for Axes {
         cursor.push(u16::from(self))
     }
 }
+#[cfg(feature = "serde")]
 impl Serialize for Axes {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
@@ -58,6 +59,7 @@ impl Serialize for Axes {
         serializer.serialize_u16(u16::from(*self))
     }
 }
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Axes {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where

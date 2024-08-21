@@ -122,6 +122,7 @@ macro_rules! impl_number {
     };
 }
 
+#[cfg(feature = "serde")]
 #[macro_export]
 macro_rules! impl_reverse_deserialize {
     ($ident:ident<$($gen:ident $(: $bound:path)?),*>, $($field:tt),*) => {
@@ -361,10 +362,12 @@ macro_rules! impl_squash_object_a {
 #[macro_export]
 macro_rules! impl_squash {
     ($ident:ident<$($gen:ident $(: $bound:path)?),*>, $($field:tt),*; $($backward_field:tt),*) => {
+        #[cfg(feature = "serde")]
         $crate::impl_reverse_deserialize!($ident<$($gen $(: $bound)?),*>, $($field),*);
         $crate::impl_squash_object_a!($ident<$($gen $(: $bound)?),*>, $($field),*; $($backward_field),*);
     };
     ($ident:ident, $($field:tt),*; $($backward_field:tt),*) => {
+        #[cfg(feature = "serde")]
         $crate::impl_reverse_deserialize!($ident, $($field),*);
         $crate::impl_squash_object_a!($ident, $($field),*; $($backward_field),*);
     };
@@ -376,6 +379,7 @@ macro_rules! impl_squash {
     };
 }
 
+#[cfg(feature = "serde")]
 #[macro_export]
 macro_rules! impl_serde_for_enum {
     ($enum_name:ident, $($variant:ident = $index:literal),*) => {

@@ -1,6 +1,7 @@
 use super::prelude::*;
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Default, Serialize)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Default)]
 pub struct RaycastParams {
    pub respect_can_collide: bool,
    pub filter_type: EnumItem,

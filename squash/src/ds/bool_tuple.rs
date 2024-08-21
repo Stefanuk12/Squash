@@ -16,6 +16,7 @@ macro_rules! decl_bool_tuple {
                 Ok($name( $( (x & (1 << $idx)) != 0 ),* ))
             }
         }
+        #[cfg(feature = "serde")]
         impl ::serde::Serialize for $name {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                 where
@@ -26,6 +27,7 @@ macro_rules! decl_bool_tuple {
                 )
             }
         }
+        #[cfg(feature = "serde")]
         impl<'de> ::serde::Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where

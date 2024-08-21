@@ -1,6 +1,7 @@
 macro_rules! impl_custom_int {
     ($name:ident, $int_type:ident, $byte_count:expr) => {
-        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, ::serde::Serialize)]
+        #[cfg_attr(feature = "serde", derive(::serde::Serialize))]
+        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
         #[allow(non_camel_case_types)]
         pub struct $name([u8; $byte_count]);
         impl $name {
@@ -62,6 +63,7 @@ macro_rules! impl_custom_int {
             }
         }
 
+        #[cfg(feature = "serde")]
         impl<'de> ::serde::Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> ::core::result::Result<Self, D::Error>
                 where
