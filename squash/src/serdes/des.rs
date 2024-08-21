@@ -2,9 +2,7 @@ use std::io::Cursor;
 
 use serde::{de::{self, EnumAccess, MapAccess, SeqAccess, VariantAccess}, Deserialize};
 
-use crate::{Error, Result, SquashCursor};
-
-use super::Vlq;
+use crate::{Error, Result, SquashCursor, Vlq};
 
 macro_rules! impl_deserialize {
     ($($fn_name:ident, $t:ty, $visit_method:ident),*) => {

@@ -1,8 +1,6 @@
-use serde::de::DeserializeOwned;
+use crate::{ux::*, SquashNumber}; 
 
-use super::{ux::*, SquashObject, Zero}; 
-
-pub trait SquashInteger: SquashObject + Clone + DeserializeOwned + Zero {}
+pub trait SquashInteger: SquashNumber {}
 impl SquashInteger for i8 {}
 impl SquashInteger for i16 {}
 impl SquashInteger for i24 {}

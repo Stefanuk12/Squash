@@ -1,8 +1,8 @@
-use std::fmt::Display;
+use core::fmt::Display;
 
 use serde::{de, ser};
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -16,6 +16,8 @@ pub enum Error {
     CharMissing,
     #[error("value too large")]
     ValueTooLarge,
+    #[error("invalid vlq: {0}")]
+    InvalidVlq(u64),
     #[error("deserialize_any is not implemented")]
     DeserializeAnyNotImplemented,
     #[error("{0}")]

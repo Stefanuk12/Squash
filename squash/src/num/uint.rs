@@ -1,8 +1,6 @@
-use serde::de::DeserializeOwned;
+use crate::{ux::*, SquashNumber};
 
-use super::{ux::*, SquashObject, Zero};
-
-pub trait SquashUint: SquashObject + Clone + DeserializeOwned + Zero {}
+pub trait SquashUint: SquashNumber {}
 impl SquashUint for u8 {}
 impl SquashUint for u16 {}
 impl SquashUint for u24 {}

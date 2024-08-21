@@ -3,9 +3,7 @@ use std::io::Cursor;
 use serde::ser;
 use serde::Serialize;
 
-use crate::{SquashCursor, Error, Result};
-
-use super::Vlq;
+use crate::{SquashCursor, Error, Result, Vlq};
 
 macro_rules! impl_serialize {
     ($($fn_name:ident, $t:ty),*) => {

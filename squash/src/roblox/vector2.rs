@@ -1,11 +1,11 @@
 use super::prelude::*;
 
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug, Default, Serialize, ReverseDeserialize, SquashObject)]
-pub struct Vector2<T: SquashNumber> {
+pub struct Vector2<T: SquashFloat> {
     pub y: T,
     pub x: T,
 }
-impl<T: SquashNumber> Vector2<T> {
+impl<T: SquashFloat> Vector2<T> {
     pub fn new(x: T, y: T) -> Self {
         Self { x, y }
     }

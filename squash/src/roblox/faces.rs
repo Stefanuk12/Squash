@@ -45,14 +45,14 @@ impl SquashObject for Faces {
 impl Serialize for Faces {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
-            S: serde::Serializer {
+            S: Serializer {
         serializer.serialize_u8(u8::from(*self))
     }
 }
 impl<'de> Deserialize<'de> for Faces {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
-            D: serde::Deserializer<'de> {
+            D: Deserializer<'de> {
         let x = u8::deserialize(deserializer)?;
         Ok(Self::from(x))
     }

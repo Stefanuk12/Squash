@@ -1,13 +1,10 @@
-use serde::Serialize;
-use crate::{SquashObject, Zero};
-
 macro_rules! impl_custom_int {
     ($name:ident, $int_type:ident, $byte_count:expr) => {
-        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Serialize)]
+        #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, ::serde::Serialize)]
         #[allow(non_camel_case_types)]
         pub struct $name([u8; $byte_count]);
         impl $name {
-            pub fn new(val: $int_type) -> Result<Self, crate::Error> {
+            pub fn new(val: $int_type) -> ::core::result::Result<Self, $crate::Error> {
                 Self::try_from(val)
             }
 
@@ -18,19 +15,19 @@ macro_rules! impl_custom_int {
 
         impl From<$name> for $int_type {
             fn from(val: $name) -> $int_type {
-                let mut bytes = [0u8; std::mem::size_of::<$int_type>()];
+                let mut bytes = [0u8; ::core::mem::size_of::<$int_type>()];
                 bytes[..$byte_count].copy_from_slice(&val.0);
                 $int_type::from_le_bytes(bytes)
             }
         }
         
         impl TryFrom<$int_type> for $name {
-            type Error = crate::Error;
+            type Error = $crate::Error;
         
-            fn try_from(val: $int_type) -> crate::Result<$name> {
+            fn try_from(val: $int_type) -> $crate::Result<$name> {
                 let bytes = val.to_le_bytes();
                 if bytes[$byte_count..].iter().any(|&x| x != 0) {
-                    return Err(crate::Error::ValueTooLarge);
+                    return Err($crate::Error::ValueTooLarge);
                 }
                 let mut arr = [0u8; $byte_count];
                 arr.copy_from_slice(&bytes[..$byte_count]);
@@ -38,16 +35,16 @@ macro_rules! impl_custom_int {
             }
         }
 
-        impl From<$name> for ux::$name {
-            fn from(val: $name) -> ux::$name {
-                ux::$name::new($int_type::from(val))
+        impl From<$name> for ::ux::$name {
+            fn from(val: $name) -> ::ux::$name {
+                ::ux::$name::new($int_type::from(val))
             }
         }
 
-        impl SquashObject for $name {
-            fn pop_obj<T>(cursor: &mut T) -> crate::Result<Self>
+        impl $crate::SquashObject for $name {
+            fn pop_obj<T>(cursor: &mut T) -> $crate::Result<Self>
             where
-                T: super::SquashCursor,
+                T: $crate::SquashCursor,
                 Self: Sized,
             {
                 let mut arr = [0u8; $byte_count];
@@ -57,7 +54,7 @@ macro_rules! impl_custom_int {
                 Ok($name(arr))
             }
 
-            fn push_obj<T: super::SquashCursor>(self, cursor: &mut T) -> crate::Result<usize> {
+            fn push_obj<T: $crate::SquashCursor>(self, cursor: &mut T) -> $crate::Result<usize> {
                 for i in (0..$byte_count).rev() {
                     cursor.push(self.0[i])?;
                 }
@@ -65,32 +62,32 @@ macro_rules! impl_custom_int {
             }
         }
 
-        impl<'de> serde::Deserialize<'de> for $name {
-            fn deserialize<D>(deserializer: D) -> serde::__private::Result<Self, D::Error>
+        impl<'de> ::serde::Deserialize<'de> for $name {
+            fn deserialize<D>(deserializer: D) -> ::core::result::Result<Self, D::Error>
                 where
-                    D: serde::Deserializer<'de> {
+                    D: ::serde::Deserializer<'de> {
                 #[doc(hidden)]
                 struct Visitor<'de> {
-                    marker: core::marker::PhantomData<$name>,
-                    lifetime: core::marker::PhantomData<&'de ()>,
+                    marker: ::core::marker::PhantomData<$name>,
+                    lifetime: ::core::marker::PhantomData<&'de ()>,
                 }
-                impl<'de> serde::de::Visitor<'de> for Visitor<'de> {
+                impl<'de> ::serde::de::Visitor<'de> for Visitor<'de> {
                     type Value = $name;
                     fn expecting(
                         &self,
-                        formatter: &mut core::fmt::Formatter,
-                    ) -> core::fmt::Result {
-                        core::fmt::Formatter::write_str(formatter, "tuple struct A")
+                        formatter: &mut ::core::fmt::Formatter,
+                    ) -> ::core::fmt::Result {
+                        ::core::fmt::Formatter::write_str(formatter, "tuple struct A")
                     }
                     #[inline]
                     fn visit_newtype_struct<E>(
                         self,
                         e: E,
-                    ) -> core::result::Result<Self::Value, E::Error>
+                    ) -> ::core::result::Result<Self::Value, E::Error>
                     where
-                        E: serde::Deserializer<'de>,
+                        E: ::serde::Deserializer<'de>,
                     {
-                        let mut x: [u8; $byte_count] = <[u8; $byte_count] as serde::Deserialize>::deserialize(e)?;
+                        let mut x: [u8; $byte_count] = <[u8; $byte_count] as ::serde::Deserialize>::deserialize(e)?;
                         x.reverse();
                         Ok($name(x))
                     }
@@ -98,19 +95,19 @@ macro_rules! impl_custom_int {
                     fn visit_seq<S>(
                         self,
                         mut seq: S,
-                    ) -> core::result::Result<Self::Value, S::Error>
+                    ) -> ::core::result::Result<Self::Value, S::Error>
                     where
-                        S: serde::de::SeqAccess<'de>,
+                        S: ::serde::de::SeqAccess<'de>,
                     {
-                        serde::de::SeqAccess::next_element::<[u8; $byte_count]>(&mut seq)?.ok_or(serde::de::Error::invalid_length(0usize, &stringify!("tuple struct ", $name, " with ", $byte_count, " element"))).map($name)
+                        ::serde::de::SeqAccess::next_element::<[u8; $byte_count]>(&mut seq)?.ok_or(::serde::de::Error::invalid_length(0usize, &stringify!("tuple struct ", $name, " with ", $byte_count, " element"))).map($name)
                     }
                 }
-                serde::Deserializer::deserialize_newtype_struct(
+                ::serde::Deserializer::deserialize_newtype_struct(
                     deserializer,
                     stringify!($name),
                     Visitor {
-                        marker: core::marker::PhantomData::<$name>,
-                        lifetime: core::marker::PhantomData,
+                        marker: ::core::marker::PhantomData::<$name>,
+                        lifetime: ::core::marker::PhantomData,
                     },
                 )
             }
@@ -128,7 +125,7 @@ macro_rules! impl_custom_int {
             }
         }
 
-        impl Zero for $name {
+        impl $crate::Zero for $name {
             const ZERO: Self = $name([0u8; $byte_count]);
         }
     };

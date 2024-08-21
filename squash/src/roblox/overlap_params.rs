@@ -10,7 +10,7 @@ pub struct OverlapParamsBool {
 impl Serialize for OverlapParamsBool {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
-            S: serde::Serializer {
+            S: Serializer {
         let mut state = serializer.serialize_struct("OverlapParamsBool", 2)?;
         state.serialize_field("brute_force_all_slow", &self.brute_force_all_slow)?;
         state.serialize_field("respect_can_collide", &self.respect_can_collide)?;
@@ -20,7 +20,7 @@ impl Serialize for OverlapParamsBool {
 impl<'de> Deserialize<'de> for OverlapParamsBool {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
-            D: serde::Deserializer<'de> {
+            D: Deserializer<'de> {
         let x = u8::deserialize(deserializer)?;
         Ok(OverlapParamsBool {
             brute_force_all_slow: (x & 1) != 0,

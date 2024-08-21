@@ -1,23 +1,35 @@
-use serde::{Deserialize, Serialize};
-
 macro_rules! decl_bool_tuple {
     ($name:ident, $($idx:tt),* $(,)? ) => {
         #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
         pub struct $name( $( pub decl_bool_tuple!( @decl $idx, bool) ),* );
-        impl Serialize for $name {
+        impl $crate::SquashObject for $name {
+            fn push_obj<T: $crate::SquashCursor>(self, cursor: &mut T) -> $crate::Result<usize> {
+                cursor.push(
+                    0u8 $( | ((self.$idx as u8) << $idx) )*
+                )
+            }
+            fn pop_obj<T>(cursor: &mut T) -> $crate::Result<Self>
+            where
+                T: $crate::SquashCursor,
+                Self: Sized {
+                let x = cursor.pop::<u8>()?;
+                Ok($name( $( (x & (1 << $idx)) != 0 ),* ))
+            }
+        }
+        impl ::serde::Serialize for $name {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                 where
-                    S: serde::Serializer 
+                    S: ::serde::Serializer 
             {
                 serializer.serialize_u8(
                     0u8 $( | ((self.$idx as u8) << $idx) )*
                 )
             }
         }
-        impl<'de> Deserialize<'de> for $name {
+        impl<'de> ::serde::Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
                 where
-                    D: serde::Deserializer<'de>
+                    D: ::serde::Deserializer<'de>
             {
                 let x = u8::deserialize(deserializer)?;
                 Ok($name( $( (x & (1 << $idx)) != 0 ),* ))

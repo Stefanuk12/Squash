@@ -7,7 +7,7 @@ macro_rules! import {
     };
 }
 
-import!(error, serdes);
+import!(ds, num, error, serdes);
 
 pub use squash_derive::*;
 
@@ -18,9 +18,9 @@ import!(roblox);
 macro_rules! impl_number {
     ($aa:ident, $t:ty, $serialize_fn:ident) => {
         impl ::serde::Serialize for $aa<$t> {
-            fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> ::core::result::Result<S::Ok, S::Error>
             where
-                S: serde::Serializer,
+                S: ::serde::Serializer,
             {
                 serializer.$serialize_fn(self.0)
             }
@@ -34,14 +34,14 @@ macro_rules! impl_number {
             }
         }
         impl $crate::SquashObject for $aa<$t> {
-            fn pop_obj<T>(cursor: &mut T) -> crate::Result<Self>
+            fn pop_obj<T>(cursor: &mut T) -> $crate::Result<Self>
             where
-                T: crate::SquashCursor,
+                T: $crate::SquashCursor,
                 Self: Sized,
             {
                 Ok(cursor.pop::<$t>().map($aa)?)
             }
-            fn push_obj<T: crate::SquashCursor>(self, cursor: &mut T) -> crate::Result<usize> {
+            fn push_obj<T: $crate::SquashCursor>(self, cursor: &mut T) -> $crate::Result<usize> {
                 Ok(cursor.push(self.0)?)
             }
         }
@@ -55,13 +55,13 @@ macro_rules! impl_number {
                 t.0
             }
         }
-        impl ::std::ops::Deref for $aa<$t> {
+        impl ::core::ops::Deref for $aa<$t> {
             type Target = $t;
             fn deref(&self) -> &$t {
                 &self.0
             }
         }
-        impl ::std::ops::DerefMut for $aa<$t> {
+        impl ::core::ops::DerefMut for $aa<$t> {
             fn deref_mut(&mut self) -> &mut $t {
                 &mut self.0
             }
@@ -69,9 +69,9 @@ macro_rules! impl_number {
     };
     ($aa:ident, $t:ty) => {
         impl ::serde::Serialize for $aa<$t> {
-            fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> ::core::result::Result<S::Ok, S::Error>
             where
-                S: serde::Serializer,
+                S: ::serde::Serializer,
             {
                 let bytes = self.0.to_le_bytes();
                 serializer.serialize_bytes(&bytes)
@@ -87,14 +87,14 @@ macro_rules! impl_number {
             }
         }
         impl $crate::SquashObject for $aa<$t> {
-            fn pop_obj<T>(cursor: &mut T) -> crate::Result<Self>
+            fn pop_obj<T>(cursor: &mut T) -> $crate::Result<Self>
             where
-                T: crate::SquashCursor,
+                T: $crate::SquashCursor,
                 Self: Sized,
             {
                 Ok(cursor.pop::<$t>().map(|x| $aa(x as $t))?)
             }
-            fn push_obj<T: crate::SquashCursor>(self, cursor: &mut T) -> crate::Result<usize> {
+            fn push_obj<T: $crate::SquashCursor>(self, cursor: &mut T) -> $crate::Result<usize> {
                 Ok(cursor.push(self.0)?)
             }
         }
@@ -108,13 +108,13 @@ macro_rules! impl_number {
                 t.0
             }
         }
-        impl ::std::ops::Deref for $aa<$t> {
+        impl ::core::ops::Deref for $aa<$t> {
             type Target = $t;
             fn deref(&self) -> &$t {
                 &self.0
             }
         }
-        impl ::std::ops::DerefMut for $aa<$t> {
+        impl ::core::ops::DerefMut for $aa<$t> {
             fn deref_mut(&mut self) -> &mut $t {
                 &mut self.0
             }
@@ -140,10 +140,10 @@ macro_rules! impl_reverse_deserialize {
 
                 impl<'de, $($gen $(: $bound)?),*> ::serde::de::Visitor<'de> for MainVisitor<$($gen),*> {
                     type Value = $ident<$($gen),*>;
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
                         formatter.write_str(stringify!("struct {}", $ident))
                     }
-                    fn visit_seq<A>(self, mut seq: A) -> std::result::Result<Self::Value, A::Error>
+                    fn visit_seq<A>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error>
                     where
                         A: ::serde::de::SeqAccess<'de>,
                     {
@@ -180,10 +180,10 @@ macro_rules! impl_reverse_deserialize {
 
                 impl<'de> ::serde::de::Visitor<'de> for MainVisitor {
                     type Value = $ident;
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
                         formatter.write_str(stringify!("struct {}", $ident))
                     }
-                    fn visit_seq<A>(self, mut seq: A) -> std::result::Result<Self::Value, A::Error>
+                    fn visit_seq<A>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error>
                     where
                         A: ::serde::de::SeqAccess<'de>,
                     {
@@ -220,10 +220,10 @@ macro_rules! impl_reverse_deserialize {
 
                 impl<'de, $($gen $(: $bound)?),*> ::serde::de::Visitor<'de> for MainVisitor<$($gen),*> {
                     type Value = $ident<$($gen),*>;
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
                         formatter.write_str(stringify!("struct {}", $ident))
                     }
-                    fn visit_seq<A>(self, mut seq: A) -> std::result::Result<Self::Value, A::Error>
+                    fn visit_seq<A>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error>
                     where
                         A: ::serde::de::SeqAccess<'de>,
                     {
@@ -258,10 +258,10 @@ macro_rules! impl_reverse_deserialize {
 
                 impl<'de> ::serde::de::Visitor<'de> for MainVisitor {
                     type Value = $ident;
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
                         formatter.write_str(stringify!("struct {}", $ident))
                     }
-                    fn visit_seq<A>(self, mut seq: A) -> std::result::Result<Self::Value, A::Error>
+                    fn visit_seq<A>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error>
                     where
                         A: ::serde::de::SeqAccess<'de>,
                     {

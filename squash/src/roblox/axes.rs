@@ -54,14 +54,14 @@ impl SquashObject for Axes {
 impl Serialize for Axes {
     fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
-            S: serde::Serializer {
+            S: Serializer {
         serializer.serialize_u16(u16::from(*self))
     }
 }
 impl<'de> Deserialize<'de> for Axes {
     fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
-            D: serde::Deserializer<'de> {
+            D: Deserializer<'de> {
         let x = u16::deserialize(deserializer)?;
         Ok(Self::from(x))
     }
