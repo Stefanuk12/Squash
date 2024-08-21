@@ -1,4 +1,4 @@
-A library for serializing and deserializing binary data with a focus on size and Roblox compatability. It is designed with the programmer in mind, offering full flexibility and control over the data being serialized and deserialized, with an intuitive API.
+A library for serializing and deserializing binary data with a focus on size and Roblox compatibility. It is designed with the programmer in mind, offering full flexibility and control over the data being serialized and deserialized, with an intuitive API.
 
 ## Implementation details
 
