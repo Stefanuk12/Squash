@@ -384,6 +384,8 @@ macro_rules! impl_serde_for_enum {
             where
                 S: ::serde::Serializer,
             {
+                use ::serde::ser::SerializeStruct;
+
                 match self {
                     $(
                         $enum_name::$variant(v) => {
@@ -402,7 +404,7 @@ macro_rules! impl_serde_for_enum {
             where
                 D: ::serde::Deserializer<'de>,
             {
-                #[derive(Deserialize)]
+                #[derive(::serde::Deserialize)]
                 #[serde(field_identifier, rename_all = "lowercase")]
                 enum Field {
                     C,
@@ -410,7 +412,7 @@ macro_rules! impl_serde_for_enum {
                 }
 
                 struct MainVisitor;
-                impl<'de> Visitor<'de> for MainVisitor {
+                impl<'de> ::serde::de::Visitor<'de> for MainVisitor {
                     type Value = $enum_name;
 
                     fn expecting(&self, formatter: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {

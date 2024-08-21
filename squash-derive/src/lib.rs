@@ -77,7 +77,7 @@ fn reverse_deserialize_struct(input: &DeriveInput, data: &DataStruct) -> TokenSt
             where
                 D: ::serde::Deserializer<'de>,
             {
-                #[derive(Deserialize)]
+                #[derive(::serde::Deserialize)]
                 #[serde(field_identifier, rename_all = "lowercase")]
                 enum Field {
                     #(#field_enum),*
@@ -172,7 +172,7 @@ fn reverse_deserialize_enum(input: &DeriveInput, data: &DataEnum) -> TokenStream
             where
                 D: ::serde::Deserializer<'de>,
             {
-                #[derive(Deserialize)]
+                #[derive(::serde::Deserialize)]
                 #[serde(field_identifier, rename_all = "lowercase")]
                 enum Field { C, T }
 

@@ -2,14 +2,29 @@
 name = "squash"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A library for serializing and deserializing binary data with a focus on size and Roblox compatability."
+repository = "https://github.com/Stefanuk12/squash-rs"
+readme = "README.md"
+categories = [
+    "encoding",
+    "parser-implementations",
+    "data-structures",
+]
+keywords = [
+    "squash",
+    "serde",
+    "roblox",
+    "luau"
+]
 
 [dependencies]
 squash-derive = { path = "../squash-derive" }
 
-thiserror = "1.0"
-serde = { version = "1.0" , features = ["derive"] }
-derive_more = { version = "1.0", features = ["full"] }
-ux = "0.1"
+thiserror.workspace = true
+serde.workspace = true
+derive_more.workspace = true
+ux.workspace = true
 
 [features]
 default = ["roblox"]

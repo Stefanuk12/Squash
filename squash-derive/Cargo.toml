@@ -2,12 +2,15 @@
 name = "squash-derive"
 version = "0.1.0"
 edition = "2021"
+description = "A library for serializing and deserializing binary data with a focus on size and Roblox compatability."
+repository = "https://github.com/Stefanuk12/squash-rs"
+readme = "README.md"
 
 [dependencies]
-syn = "2.0"
-quote = "1.0"
-proc-macro2 = "1.0"
-proc-macro-crate = "3.1"
+syn.workspace = true
+quote.workspace = true
+proc-macro2.workspace = true
+proc-macro-crate.workspace = true
 
 [lib]
 proc-macro = true
