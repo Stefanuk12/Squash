@@ -54,3 +54,14 @@ where
         println!("{:?} - {}", buf, self.position());
     }
 }
+
+pub fn serialize<T: SquashObject>(value: T) -> crate::Result<Vec<u8>> {
+    let mut cursor = Cursor::new(Vec::new());
+    cursor.push(value)?;
+    Ok(cursor.into_inner())
+}
+
+pub fn deserialize<T: SquashObject>(data: Vec<u8>) -> crate::Result<T> {
+    let mut cursor = Cursor::new(data);
+    cursor.pop()
+}
