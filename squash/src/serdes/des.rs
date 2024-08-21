@@ -16,7 +16,7 @@ macro_rules! impl_deserialize {
     };
 }
 
-pub fn deserialize<'de, T>(input: &'de mut Vec<u8>) -> Result<T>
+pub fn serde_deserialize<'de, T>(input: &'de mut Vec<u8>) -> Result<T>
 where 
     T: Deserialize<'de>,
 {

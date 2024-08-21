@@ -15,7 +15,7 @@ macro_rules! impl_serialize {
     };
 }
 
-pub fn serialize<T>(value: &T) -> Result<Vec<u8>>
+pub fn serde_serialize<T>(value: &T) -> Result<Vec<u8>>
     where
         T: Serialize {
     let output = Cursor::new(Vec::new());
