@@ -3,6 +3,7 @@ use core::fmt::Display;
 use serde::{de, ser};
 
 pub type Result<T> = core::result::Result<T, Error>;
+pub type CoreResult<T, E> = core::result::Result<T, E>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {

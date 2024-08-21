@@ -69,7 +69,7 @@ impl SquashObject for Vlq {
 }
 
 impl Serialize for Vlq {
-    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> CoreResult<S::Ok, S::Error>
         where
             S: Serializer {
         let mut cursor = Cursor::new(Vec::new());
@@ -78,7 +78,7 @@ impl Serialize for Vlq {
     }
 }
 impl<'de> Deserialize<'de> for Vlq {
-    fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
+    fn deserialize<D>(deserializer: D) -> CoreResult<Self, D::Error>
         where
             D: Deserializer<'de> {
         let bytes = Vec::<u8>::deserialize(deserializer)?;
